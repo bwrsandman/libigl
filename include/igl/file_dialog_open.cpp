@@ -83,6 +83,12 @@ IGL_INLINE std::string igl::file_dialog_open()
     }
   }
   buffer[pos] = 0;
+
+#elif defined __EMSCRIPTEN__
+
+  // TODO
+  assert(false);
+
 #else
 
   // For linux use zenity
