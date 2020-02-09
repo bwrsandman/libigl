@@ -222,45 +222,74 @@ namespace glfw
     return EXIT_SUCCESS;
   }
 
+  IGL_INLINE bool Viewer::main_loop(int& frame_counter)
+  {
+    const int num_extra_frames = 5;
+    double tic = get_seconds();
+    draw();
+    glfwSwapBuffers(window);
+    if(core().is_animating || frame_counter++ < num_extra_frames)
+    {
+      glfwPollEvents();
+      // In microseconds
+      double duration = 1000000.*(get_seconds()-tic);
+      const double min_duration = 1000000./core().animation_max_fps;
+      if(duration<min_duration)
+      {
+        std::this_thread::sleep_for(std::chrono::microseconds((int)(min_duration-duration)));
+      }
+    }
+    else
+    {
+      glfwWaitEvents();
+      frame_counter = 0;
+    }
+
+    #ifdef __APPLE__
+    static bool first_time_hack  = true;
+    if(first_time_hack) {
+      glfwHideWindow(window);
+      glfwShowWindow(window);
+      first_time_hack = false;
+    }
+    #endif
+
+    return !glfwWindowShouldClose(window);
+  }
+
+  #if __EMSCRIPTEN__
+  #include <emscripten/emscripten.h>
+
+  struct em_loop_payload_t
+  {
+    Viewer* viewer;
+    int frame_counter;
+  };
+
+  IGL_INLINE void em_main_loop_callback(void* arg)
+  {
+    auto payload = reinterpret_cast<em_loop_payload_t*>(arg);
+    if (!payload->viewer->main_loop(payload->frame_counter)) {
+      emscripten_cancel_main_loop();
+    }
+  }
+  #endif
+
   IGL_INLINE bool Viewer::launch_rendering(bool loop)
   {
     // glfwMakeContextCurrent(window);
     // Rendering loop
-    const int num_extra_frames = 5;
     int frame_counter = 0;
-    while (!glfwWindowShouldClose(window))
+    if (!loop)
     {
-      double tic = get_seconds();
-      draw();
-      glfwSwapBuffers(window);
-      if(core().is_animating || frame_counter++ < num_extra_frames)
-      {
-        glfwPollEvents();
-        // In microseconds
-        double duration = 1000000.*(get_seconds()-tic);
-        const double min_duration = 1000000./core().animation_max_fps;
-        if(duration<min_duration)
-        {
-          std::this_thread::sleep_for(std::chrono::microseconds((int)(min_duration-duration)));
-        }
-      }
-      else
-      {
-        glfwWaitEvents();
-        frame_counter = 0;
-      }
-      if (!loop)
-        return !glfwWindowShouldClose(window);
-
-      #ifdef __APPLE__
-        static bool first_time_hack  = true;
-        if(first_time_hack) {
-          glfwHideWindow(window);
-          glfwShowWindow(window);
-          first_time_hack = false;
-        }
-      #endif
+      return main_loop(frame_counter);
     }
+#if __EMSCRIPTEN__
+    em_loop_payload_t payload {this, frame_counter};
+    emscripten_set_main_loop_arg(em_main_loop_callback, &payload, 0, true);
+#else
+    while (main_loop(frame_counter)) {}
+#endif
     return EXIT_SUCCESS;
   }
 
