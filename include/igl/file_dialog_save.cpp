@@ -70,6 +70,11 @@ IGL_INLINE std::string igl::file_dialog_save()
     buffer[pos] = 0;
   }
 
+#elif defined __EMSCRIPTEN__
+
+  // TODO
+  assert(false);
+
 #else
   // For every other machine type use zenity
   FILE * output = popen("/usr/bin/zenity --file-selection --save","r");
