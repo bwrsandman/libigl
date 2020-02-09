@@ -37,7 +37,11 @@ option(TUTORIALS_CHAPTER7 "Compile chapter 7" ON)
 # Store location of tutorial/shared directory
 set(TUTORIAL_SHARED_PATH ${LIBIGL_EXTERNAL}/../tutorial/data CACHE PATH "location of shared tutorial resources")
 add_library(tutorials INTERFACE)
-target_compile_definitions(tutorials INTERFACE "-DTUTORIAL_SHARED_PATH=\"${TUTORIAL_SHARED_PATH}\"")
+if (EMSCRIPTEN)
+  target_compile_definitions(tutorials INTERFACE "-DTUTORIAL_SHARED_PATH=\".\"")
+else()
+  target_compile_definitions(tutorials INTERFACE "-DTUTORIAL_SHARED_PATH=\"${TUTORIAL_SHARED_PATH}\"")
+endif()
 target_include_directories(tutorials INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Chapter 1

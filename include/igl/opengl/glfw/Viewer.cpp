@@ -201,7 +201,9 @@ namespace glfw
     glfwSetWindowSizeCallback(window,glfw_window_size);
     glfwSetMouseButtonCallback(window,glfw_mouse_press);
     glfwSetScrollCallback(window,glfw_mouse_scroll);
+    #if !defined(__EMSCRIPTEN__)
     glfwSetCharModsCallback(window,glfw_char_mods_callback);
+    #endif
     glfwSetDropCallback(window,glfw_drop_callback);
     // Handle retina displays (windows and mac)
     int width, height;
