@@ -39,7 +39,7 @@ IGL_INLINE void ImGuiMenu::init(igl::opengl::glfw::Viewer *_viewer)
       static ImGuiContext * __global_context = ImGui::CreateContext();
       context_ = __global_context;
     }
-    const char* glsl_version = "#version 150";
+    const char* glsl_version = "#version 300 es";
     ImGui_ImplGlfw_InitForOpenGL(viewer->window, false);
     ImGui_ImplOpenGL3_Init(glsl_version);
     ImGui::GetIO().IniFilename = nullptr;
