@@ -133,7 +133,15 @@ IGL_INLINE void igl::opengl::MeshGL::bind_overlay_points()
 
 IGL_INLINE void igl::opengl::MeshGL::draw_mesh(bool solid)
 {
+  #if defined(__EMSCRIPTEN__)
+  // TODO: In webgl, wireframe must be drawn using a shader and barycentric coordinates
+  if (!solid)
+  {
+    return;
+  }
+  #else
   glPolygonMode(GL_FRONT_AND_BACK, solid ? GL_FILL : GL_LINE);
+  #endif
 
   /* Avoid Z-buffer fighting between filled triangles & wireframe lines */
   if (solid)
@@ -144,7 +152,9 @@ IGL_INLINE void igl::opengl::MeshGL::draw_mesh(bool solid)
   glDrawElements(GL_TRIANGLES, 3*F_vbo.rows(), GL_UNSIGNED_INT, 0);
 
   glDisable(GL_POLYGON_OFFSET_FILL);
+  #if !defined(__EMSCRIPTEN__)
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  #endif
 }
 
 IGL_INLINE void igl::opengl::MeshGL::draw_overlay_lines()
