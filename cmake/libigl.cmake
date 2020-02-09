@@ -327,6 +327,9 @@ if(LIBIGL_WITH_OPENGL)
   target_link_libraries(igl_opengl ${IGL_SCOPE})
   if (EMSCRIPTEN)
     target_link_libraries(igl_opengl ${IGL_SCOPE})
+    set_target_properties(igl_opengl PROPERTIES
+      COMPILE_FLAGS "-s USE_WEBGL2=1"
+    )
   else()
     target_link_libraries(igl_opengl ${IGL_SCOPE} ${OPENGL_gl_LIBRARY})
   endif()
